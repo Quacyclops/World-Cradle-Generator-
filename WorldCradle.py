@@ -91,9 +91,20 @@ def init_db_connection():
         port=os.getenv("DB_PORT")
     )
 
+def get_db_connection():
+    try:
+        conn = init_db_connection()
+        # Test if the connection is broken or closed
+        if conn.closed != 0:
+            st.cache_resource.clear()  # wipe the stale cache
+            conn = init_db_connection() # Re-run fresh handshake
+        return conn
+    except Exception:
+        st.cache_resource.clear()
+        return init_db_connection()
 
 def get_or_create_author(name: str, email: str):
-    conn = init_db_connection()
+    conn = get_db_connection()
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
             "INSERT INTO authors (name, email) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name RETURNING author_id;",
