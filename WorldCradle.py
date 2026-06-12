@@ -81,7 +81,7 @@ class LoreBible(BaseModel):
 
 
 load_dotenv()
-@st.cache_resource
+#@st.cache_resource
 def init_db_connection():
     return psycopg2.connect(
         dbname=os.getenv("DB_NAME"),
